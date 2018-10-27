@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float prox;
 
     private boolean start;
+    private boolean pocket;
 
     private int countProximity;
     private int counterFart;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorService =	(SensorManager)	getSystemService(SENSOR_SERVICE);
 
         start = false;
+        pocket = false;
         countProximity = 0;
         counterFart = 1;
 
@@ -62,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
        if(start) {
 
+           checkPosition();
+
             //Take de accelerometer sensor values
            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                rotation = event.values[1];
@@ -72,8 +76,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                prox = event.values[0];
            }
 
-
-           if (isInThePocket()) {
+           if (pocket) {
                //If the user do the correct action and the delay is over -> fart()
                if (rotation > -5 && prox == 0.0 && delay == 0) {
                    fart();
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     /**
      * Check if the position of the phone is the right one
      */
-    private boolean isInThePocket() {
+    private void checkPosition() {
 
         if (position > -1 && position < 1 && rotation < -8 && rotation > -10 && prox == 0.0) {
             countProximity++;
@@ -100,10 +103,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         if (countProximity >= 8) {
-            return true;
+            pocket = true;
         }
-
-        return false;
 
     }
 

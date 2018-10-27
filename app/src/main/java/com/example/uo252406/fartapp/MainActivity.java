@@ -22,11 +22,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float position;
     private float prox;
 
-    private boolean estaEnBolsillo = false;
-    private boolean start = false;
+    private boolean start;
 
-    private int countProximity = 0;
-    private int counterFart = 1;
+    private int countProximity;
+    private int counterFart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +34,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         sensorService =	(SensorManager)	getSystemService(SENSOR_SERVICE);
 
+        start = false;
+        countProximity = 0;
+        counterFart = 1;
+
+        //Start de info dialog
         final Dialog info = new Dialog(this);
         info.setContentView(R.layout.info_dialog);
         info.show();
@@ -58,65 +62,56 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
        if(start) {
 
+            //Take de accelerometer sensor values
            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                rotation = event.values[1];
                position = event.values[2];
            }
-
+           //Take de proximity sensor value
            if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
                prox = event.values[0];
            }
 
 
-           if (estaEnBolsillo) {
-
+           if (isInThePocket()) {
+               //If the user do the correct action and the delay is over -> fart()
                if (rotation > -5 && prox == 0.0 && delay == 0) {
-                  fart();
+                   fart();
                }
-
+               //Decrements the delay
                if (delay > 0)
                    delay--;
            }
 
-           if (position > -1 && position < 1 && rotation < -8 && rotation > -10 && prox == 0.0) {
-               countProximity++;
-           }else
-               countProximity = 0;
 
-
-           if (countProximity >= 8) {
-               estaEnBolsillo = true;
-           }
        }
 
     }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    /**
+     * Check if the position of the phone is the right one
+     */
+    private boolean isInThePocket() {
 
-    }
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-
-        sensorService.registerListener(this,	sensorService.getDefaultSensor(
-        Sensor.TYPE_ACCELEROMETER),	sensorService.SENSOR_DELAY_UI);
-
-        sensorService.registerListener(this,	sensorService.getDefaultSensor(
-                Sensor.TYPE_PROXIMITY),	sensorService.SENSOR_DELAY_UI);
-
-    }
+        if (position > -1 && position < 1 && rotation < -8 && rotation > -10 && prox == 0.0) {
+            countProximity++;
+        }else
+            countProximity = 0;
 
 
-    @Override
-    protected void onPause(){
-        super.onPause();
-        sensorService.unregisterListener(this);
+        if (countProximity >= 8) {
+            return true;
+        }
+
+        return false;
 
     }
 
 
+    /**
+     * Choose an audio each time is called and plays it.
+     * Set a delay between audio and audio.
+     */
     private void fart(){
 
         int rawID = getApplicationContext().getResources().getIdentifier("fart"+counterFart,"raw",getApplicationContext().getPackageName());
@@ -133,10 +128,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         else
             counterFart = 1;
 
-
     }
 
-
+    /**
+     * Prepares the MediaPlayer
+     */
     private	void getReady()
     {
         try {
@@ -148,5 +144,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        sensorService.registerListener(this,	sensorService.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER),	sensorService.SENSOR_DELAY_UI);
+
+        sensorService.registerListener(this,	sensorService.getDefaultSensor(
+                Sensor.TYPE_PROXIMITY),	sensorService.SENSOR_DELAY_UI);
+
+    }
+
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        sensorService.unregisterListener(this);
+
+    }
 
 }

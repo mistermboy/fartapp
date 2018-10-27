@@ -1,4 +1,4 @@
-package com.example.uo252406.fartapp;
+package es.uniovi.uo252406.fartapp;
 
 import android.app.Dialog;
 import android.hardware.Sensor;
@@ -8,10 +8,16 @@ import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+
+
+public class MainActivity extends AppCompatActivity  implements SensorEventListener {
 
     private SensorManager sensorService;
     private MediaPlayer mp;
@@ -28,10 +34,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int countProximity;
     private int counterFart;
 
+    private AdView mAdView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Google Ads
+        MobileAds.initialize(this, "ca-app-pub-1654699572061105~4329317663");
+
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         sensorService =	(SensorManager)	getSystemService(SENSOR_SERVICE);
 
@@ -81,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                if (rotation > -5 && prox == 0.0 && delay == 0) {
                    fart();
                }
+
                //Decrements the delay
                if (delay > 0)
                    delay--;
@@ -118,11 +134,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int rawID = getApplicationContext().getResources().getIdentifier("fart"+counterFart,"raw",getApplicationContext().getPackageName());
         mp = MediaPlayer.create(getApplicationContext(),rawID);
 
-        mp.stop();
-        getReady();
+        Log.i("DEELAAAY",""+rawID);
+
+        if(mp.isPlaying()){
+            mp.stop();
+            getReady();
+        }
+
         mp.start();
 
-        delay = 25;
+        delay = 100;
 
         if(counterFart < 11)
             counterFart++;

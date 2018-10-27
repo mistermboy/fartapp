@@ -1,4 +1,4 @@
-package com.example.uo252406.fartapp;
+package es.uniovi.uo252406.fartapp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
